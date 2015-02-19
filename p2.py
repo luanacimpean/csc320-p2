@@ -153,8 +153,7 @@ if __name__ == "__main__":
     time.clock()
 
     k = -1
-    
-    while (((canvas == -1) == True).sum() > 1):
+    while (len(np.where (canvas == -1)[1]) > 1):
         k += 1
         # finding a negative pixel
         # Randomly select stroke center
