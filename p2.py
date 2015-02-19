@@ -12,6 +12,7 @@ import time
 import matplotlib.image as mpimg
 import scipy as sci
 import os
+from random import randint
 
 np.set_printoptions(threshold = np.nan)  
 
