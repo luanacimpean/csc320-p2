@@ -1,4 +1,3 @@
-import os
 
 ###########################################################################
 ## Handout painting code.
@@ -12,6 +11,7 @@ import random
 import time
 import matplotlib.image as mpimg
 import scipy as sci
+import os
 
 np.set_printoptions(threshold = np.nan)  
 
@@ -152,9 +152,10 @@ if __name__ == "__main__":
     time.time()
     time.clock()
 
-        
+    k = -1
     
-    for k in range(500):
+    while (((canvas == -1) == True).sum() > 1):
+        k += 1
         # finding a negative pixel
         # Randomly select stroke center
         cntr = np.floor(np.random.rand(2,1).flatten() * np.array([sizeIm[1], sizeIm[0]])) + 1
