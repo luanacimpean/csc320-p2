@@ -124,7 +124,6 @@ def paintStroke(canvas, x, y, p0, p1, colour, rad):
 if __name__ == "__main__":
     # Read image and convert it to double, and scale each R,G,B
     # channel to range [0,1].
-
     imRGB = array(Image.open('orchid.jpg'))
     imRGB = double(imRGB) / 255.0
     plt.clf()
@@ -164,7 +163,6 @@ if __name__ == "__main__":
 #         print cntr
 #         cntr = np.amin(np.vstack((cntr, np.array([sizeIm[1], sizeIm[0]]))), axis=0)
 # 
-        unpainted = np.where(canvas == -1)
         rando = randint(0,len(unpainted[0]) - 1)
         
         cntr = np.array([unpainted[1][rando], unpainted[0][rando]])
