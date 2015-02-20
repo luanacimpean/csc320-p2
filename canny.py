@@ -224,3 +224,9 @@ def nextNbd(im, p0, p1, p2, thres):
                 return [x,y]
     return -1
 
+if __name__ == "__main__":
+    imRGB = array(Image.open('orchid.jpg'))
+    imRGB = double(imRGB) / 255.0
+    cannied = canny(imRGB[:,:,0], 2)
+    imshow(cannied)
+    show()
