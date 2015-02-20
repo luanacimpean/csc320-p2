@@ -12,6 +12,7 @@ import time
 import matplotlib.image as mpimg
 import scipy as sci
 import os
+from random import randint
 
 np.set_printoptions(threshold = np.nan)  
 
@@ -124,6 +125,7 @@ def paintStroke(canvas, x, y, p0, p1, colour, rad):
 if __name__ == "__main__":
     # Read image and convert it to double, and scale each R,G,B
     # channel to range [0,1].
+    os.chdir('/Users/sajjad/School/ThirdYear/CSC320/repo/csc320-p2')
     imRGB = array(Image.open('orchid.jpg'))
     imRGB = double(imRGB) / 255.0
     plt.clf()
@@ -153,12 +155,23 @@ if __name__ == "__main__":
     time.clock()
 
     k = -1
-    while (len(np.where (canvas == -1)[1]) > 1):
+    unpainted = np.where (canvas == -1)
+    
+    while (len(unpainted[1]) > 1):
         k += 1
+        range = len(unpainted[1])
+        index = randint(0,range+1)
+        col = unpainted[0][index]
+        row = unpainted[1][index]
+        cntr = [col,row]
+        print "hi"
         # finding a negative pixel
+        
         # Randomly select stroke center
-        cntr = np.floor(np.random.rand(2,1).flatten() * np.array([sizeIm[1], sizeIm[0]])) + 1
-        cntr = np.amin(np.vstack((cntr, np.array([sizeIm[1], sizeIm[0]]))), axis=0)
+#         cntr = np.floor(np.random.rand(2,1).flatten() * np.array([sizeIm[1], sizeIm[0]])) + 1
+        print cntr
+#         cntr = np.amin(np.vstack((cntr, np.array([sizeIm[1], sizeIm[0]]))), axis=0)
+        print cntr
         # Grab colour from image at center position of the stroke.
         colour = np.reshape(imRGB[cntr[1]-1, cntr[0]-1, :],(3,1))
         # Add the stroke to the canvas
@@ -167,6 +180,7 @@ if __name__ == "__main__":
         canvas = paintStroke(canvas, x, y, cntr - delta * length2, cntr + delta * length1, colour, rad)
         #print imRGB[cntr[1]-1, cntr[0]-1, :], canvas[cntr[1]-1, cntr[0]-1, :]
         print 'stroke', k
+        unpainted = np.where (canvas == -1)
         
     print "done!"
     time.time()
@@ -175,5 +189,6 @@ if __name__ == "__main__":
     plt.clf()
     plt.axis('off')
     plt.imshow(canvas)
-    plt.pause(3)
-    colorImSave('output.png', canvas)
+    show()
+#     plt.pause(3)
+#     colorImSave('output.png', canvas)
