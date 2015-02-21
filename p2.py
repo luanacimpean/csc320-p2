@@ -12,6 +12,7 @@ import matplotlib.image as mpimg
 import scipy as sci
 import os
 from random import randint
+from canny import *
 
 np.set_printoptions(threshold = np.nan)  
 
