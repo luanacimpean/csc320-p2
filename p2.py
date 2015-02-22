@@ -125,8 +125,16 @@ def paintStroke(canvas, x, y, p0, p1, colour, rad):
 if __name__ == "__main__":
     # Read image and convert it to double, and scale each R,G,B
     # channel to range [0,1].
+
+    #imRGB = array(Image.open('orchid.jpg'))
+    #imRGB = double(imRGB) / 255.0
+    #plt.clf()
+    #plt.axis('off')
+    
     imRGB = array(Image.open('orchid.jpg'))
     imRGB = double(imRGB) / 255.0
+    cannied = canny(imRGB[:,:,0], 2, 40, 20)
+    # imRGB = canny(imRGB[:,:,0], 2, 25, 15)
     plt.clf()
     plt.axis('off')
     
@@ -164,19 +172,21 @@ if __name__ == "__main__":
 #         print cntr
 #         cntr = np.amin(np.vstack((cntr, np.array([sizeIm[1], sizeIm[0]]))), axis=0)
 # 
+        unpainted = np.where(canvas == -1)
         rando = randint(0,len(unpainted[0]) - 1)
         
         cntr = np.array([unpainted[1][rando], unpainted[0][rando]])
         cntr = np.amin(np.vstack((cntr, np.array([sizeIm[1], sizeIm[0]]))), axis=0)
+        cntr = array([cntr[0]+1,cntr[1]+1])
 
-#        # Grab colour from image at center position of the stroke.
+        # Grab colour from image at center position of the stroke.
 #        colour = np.reshape(imRGB[cntr[1]-1, cntr[0]-1, :],(3,1))
 #        # Add the stroke to the canvas
 #        nx, ny = (sizeIm[1], sizeIm[0])
-#        length1, length2 = (halfLen, halfLen) 
+        length1, length2 = (halfLen, halfLen) 
 
         # if the center is at a canny edge:
-        if (cannied[cntr[1]][cntr[0]] == 1):
+        if (cannied[cntr[1]-1][cntr[0]-1] == 1):
             # Grab colour from image at center position of the stroke.
             colour = np.reshape(imRGB[cntr[1]-1, cntr[0]-1, :],(3,1))
             # Add the stroke to the canvas
@@ -209,15 +219,15 @@ if __name__ == "__main__":
         else:
             mult1 = 1
             p1 = cntr - delta
-            while ((mult1 < length2) and (int(p1[0]) < len(canvas[0])) and (int(p1[1]) < len(canvas[1])) and (cannied[int(p1[1]-1)][int(p1[0])] != 1)):
+            while ((mult1 < length2) and (int(p1[0]) < len(canvas[0])) and (int(p1[1]) < len(canvas[1])) and (cannied[int(p1[1]-2)][int(p1[0])] != 1)):
                 p1 = cntr - delta*mult1
-                mult1 = mult1 + 1      
+                mult1 = mult1 + 1
             
             mult2 = 1
             p2 = cntr + delta
-            while ((mult2 < length1) and (int(p2[0]) < len(canvas[0])) and (int(p2[1]) < len(canvas[1])) and (cannied[int(p2[1]-1)][int(p2[0])] != 1)):
+            while ((mult2 < length1) and (int(p2[0]) < len(canvas[0])) and (int(p2[1]) < len(canvas[1])) and (cannied[int(p2[1]-2)][int(p2[0])] != 1)):
                 p2 = cntr + delta*mult2
-                mult2 = mult2 + 1 
+                mult2 = mult2 + 1
                 
             colour = np.reshape(imRGB[cntr[1]-1, cntr[0]-1, :],(3,1))
             # Add the stroke to the canvas
@@ -225,6 +235,8 @@ if __name__ == "__main__":
             canvas = paintStroke(canvas, x, y, p1, p2, colour, 1)
 #            print cntr, p1, p2
 #            print 'stroke', k
+        
+#        canvas = paintStroke(canvas, x, y, array([cntr[0]+1,cntr[1]+1]), array([cntr[0]+1,cntr[1]+1]), colour, 1)
                     
 #        # Grab colour from image at center position of the stroke.
 #        colour = np.reshape(imRGB[cntr[1]-1, cntr[0]-1, :],(3,1))
@@ -235,7 +247,6 @@ if __name__ == "__main__":
 #        #print imRGB[cntr[1]-1, cntr[0]-1, :], canvas[cntr[1]-1, cntr[0]-1, :]
 #        print 'stroke', k
         unpainted = np.where (canvas == -1)
-      
         
     print "done!"
     time.time()
@@ -245,5 +256,3 @@ if __name__ == "__main__":
     plt.axis('off')
     plt.imshow(canvas)
     show()
-#     plt.pause(3)
-#     colorImSave('output.png', canvas)
