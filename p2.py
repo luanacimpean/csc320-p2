@@ -12,6 +12,7 @@ import matplotlib.image as mpimg
 import scipy as sci
 import os
 from random import randint
+from canny import *
 
 np.set_printoptions(threshold = np.nan)  
 
@@ -124,6 +125,7 @@ def paintStroke(canvas, x, y, p0, p1, colour, rad):
 if __name__ == "__main__":
     # Read image and convert it to double, and scale each R,G,B
     # channel to range [0,1].
+    os.chdir('/Users/sajjad/School/ThirdYear/CSC320/repo/csc320-p2')
     imRGB = array(Image.open('orchid.jpg'))
     imRGB = double(imRGB) / 255.0
     plt.clf()
@@ -154,6 +156,8 @@ if __name__ == "__main__":
 
     k = -1
     unpainted = np.where (canvas == -1)
+    
+    cannied = canny(imRGB[:,:,0], 2)
     
     while (len(unpainted[1]) > 1):
         k += 1

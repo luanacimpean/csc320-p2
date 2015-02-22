@@ -16,7 +16,7 @@ from scipy import *
 from scipy.ndimage import *
 from scipy.signal import convolve2d as conv
 
-def canny(im, sigma, thresHigh = 50,thresLow = 10):
+def canny(im, sigma, thresHigh = 25,thresLow = 15):
     '''
         Takes an input image in the range [0, 1] and generate a gradient image
         with edges marked by 1 pixels.
@@ -225,6 +225,7 @@ def nextNbd(im, p0, p1, p2, thres):
     return -1
 
 if __name__ == "__main__":
+    os.chdir('/Users/sajjad/School/ThirdYear/CSC320/repo/csc320-p2')
     imRGB = array(Image.open('orchid.jpg'))
     imRGB = double(imRGB) / 255.0
     cannied = canny(imRGB[:,:,0], 2)
