@@ -182,31 +182,50 @@ if __name__ == "__main__":
             # Add the stroke to the canvas
             nx, ny = (sizeIm[1], sizeIm[0])
             # length1, length2 = (halfLen, halfLen)        
-            canvas = paintStroke(canvas, x, y, cntr, cntr, colour, rad)
-            print 'stroke of length 1', k
+            canvas = paintStroke(canvas, x, y, cntr, cntr, colour, 1)
+#            print 'stroke of length 1', k
 
         # otherwise, paint strokes until you hit a canny edge
+#        else:
+#            mult1 = 1
+#            p1 = cntr - [int(i) for i in delta]
+#            while ((mult1 < length2) and (cannied[p1[1]][p1[0]] != 1)):
+#                p1 = cntr - [int(i)*mult1 for i in delta]
+#                mult1 = mult1 + 1        
+#            
+#            mult2 = 1
+#            p2 = cntr + [int(i) for i in delta]
+#            while ((mult2 < length1) and (cannied[p2[1]][p2[0]] != 1)):
+#                p2 = cntr + [int(i)*mult2 for i in delta]
+#                mult2 = mult2 + 1 
+#                
+#            colour = np.reshape(imRGB[cntr[1]-1, cntr[0]-1, :],(3,1))
+#            # Add the stroke to the canvas
+#            nx, ny = (sizeIm[1], sizeIm[0])
+#            canvas = paintStroke(canvas, x, y, p1, p2, colour, rad)
+#            print cntr, p1, p2
+#            print 'stroke', k
+            
         else:
             mult1 = 1
-            p1 = cntr - [int(i) for i in delta]
-            while ((mult1 < length2) and (cannied[p1[1]][p1[0]] != 1)):
-                p1 = cntr - [int(i)*mult1 for i in delta]
-                mult1 = mult1 + 1        
+            p1 = cntr - delta
+            while ((mult1 < length2) and (int(p1[0]) < len(canvas[0])) and (int(p1[1]) < len(canvas[1])) and (cannied[int(p1[1]-1)][int(p1[0])] != 1)):
+                p1 = cntr - delta*mult1
+                mult1 = mult1 + 1      
             
             mult2 = 1
-            p2 = cntr + [int(i) for i in delta]
-            while ((mult2 < length1) and (cannied[p2[1]][p2[0]] != 1)):
-                p2 = cntr + [int(i)*mult2 for i in delta]
+            p2 = cntr + delta
+            while ((mult2 < length1) and (int(p2[0]) < len(canvas[0])) and (int(p2[1]) < len(canvas[1])) and (cannied[int(p2[1]-1)][int(p2[0])] != 1)):
+                p2 = cntr + delta*mult2
                 mult2 = mult2 + 1 
                 
             colour = np.reshape(imRGB[cntr[1]-1, cntr[0]-1, :],(3,1))
             # Add the stroke to the canvas
             nx, ny = (sizeIm[1], sizeIm[0])
-            canvas = paintStroke(canvas, x, y, p1, p2, colour, rad)
-            'stroke', k
-
-
-
+            canvas = paintStroke(canvas, x, y, p1, p2, colour, 1)
+#            print cntr, p1, p2
+#            print 'stroke', k
+                    
 #        # Grab colour from image at center position of the stroke.
 #        colour = np.reshape(imRGB[cntr[1]-1, cntr[0]-1, :],(3,1))
 #        # Add the stroke to the canvas
@@ -216,6 +235,7 @@ if __name__ == "__main__":
 #        #print imRGB[cntr[1]-1, cntr[0]-1, :], canvas[cntr[1]-1, cntr[0]-1, :]
 #        print 'stroke', k
         unpainted = np.where (canvas == -1)
+      
         
     print "done!"
     time.time()
