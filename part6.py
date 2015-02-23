@@ -202,14 +202,14 @@ if __name__ == "__main__":
         k += 1
     
     
-#         TODO: rgb isnt working. 'float' object is not callable error? lolwut
-#         # r,g,b 
-#         range = 15.0/255.0
-#         rand_i = round(random.uniform((-1*range), range), 6)
-#         rand_i = round(random.uniform((-1*range), range), 6)
-#         rand_i = round(random.uniform((-1*range), range), 6)
-#         # intensity
-#         rand_i = round(random.uniform(0.85, 1.15), 6)
+        # TODO: rgb isnt working. 'float' object is not callable error? lolwut
+        # r,g,b 
+        ran = 15.0/255.0
+        rand_r = round(random.uniform((-1*ran), ran), 6)
+        rand_b = round(random.uniform((-1*ran), ran), 6)
+        rand_g = round(random.uniform((-1*ran), ran), 6)
+        # intensity
+        rand_i = round(random.uniform(0.85, 1.15), 6)
         # length
         halfLen= randint(2,8)
         # radius 
@@ -233,16 +233,16 @@ if __name__ == "__main__":
         length1, length2 = (halfLen, halfLen) 
 
         colour = np.reshape(imRGB[cntr[1], cntr[0], :],(3,1))
-#         new_r = (colour[0]+rand_r) * rand_i
-#         new_g = (colour[1]+rand_g) * rand_i
-#         new_b = (colour[2]+rand_b) * rand_i 
-#         
-#         colour = np.reshape([new_r,new_g, new_b],(3,1))
-#         for c in colour:
-#             if (c < 0):
-#                 c = 0
-#             elif (c > 1):
-#                 c = 1
+        new_r = (colour[0]+rand_r) * rand_i
+        new_g = (colour[1]+rand_g) * rand_i
+        new_b = (colour[2]+rand_b) * rand_i 
+         
+        colour = np.reshape([new_r,new_g, new_b],(3,1))
+        for c in colour:
+            if (c < 0):
+                c = 0
+            elif (c > 1):
+                c = 1
 
         nx, ny = (sizeIm[1], sizeIm[0])
         
