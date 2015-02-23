@@ -3,6 +3,8 @@
 ###########################################################################
 from PIL import Image
 from pylab import *
+from canny import *
+from random import randint
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.cbook as cbook
@@ -11,8 +13,7 @@ import time
 import matplotlib.image as mpimg
 import scipy as sci
 import os
-from random import randint
-from canny import *
+
 
 np.set_printoptions(threshold = np.nan)  
 
@@ -128,6 +129,8 @@ if __name__ == "__main__":
     os.chdir('/Users/sajjad/School/ThirdYear/CSC320/repo/csc320-p2')
     imRGB = array(Image.open('orchid.jpg'))
     imRGB = double(imRGB) / 255.0
+    cannied = canny(imRGB[:,:,0], 2)
+
     plt.clf()
     plt.axis('off')
     
@@ -135,7 +138,7 @@ if __name__ == "__main__":
     sizeIm = sizeIm[0:2]
     # Set radius of paint brush and half length of drawn lines
     rad = 3
-    halfLen = 10
+    halfLen = 5
     
     # Set up x, y coordinate images, and canvas.
     [x, y] = np.meshgrid(np.array([i+1 for i in range(int(sizeIm[1]))]), np.array([i+1 for i in range(int(sizeIm[0]))]))
@@ -146,80 +149,142 @@ if __name__ == "__main__":
     # Random number seed
     np.random.seed(29645)
     
-    # Orientation of paint brush strokes
-    theta = 2 * pi * np.random.rand(1,1)[0][0]
-    # Set vector from center to one end of the stroke.
-    delta = np.array([cos(theta), sin(theta)])
-       
     time.time()
     time.clock()
 
+    '''
+        Takes an input image in the range [0, 1] and generate a gradient image
+        with edges marked by 1 pixels.
+    '''
+    imin = (imRGB[:,:,0]).copy() * 255.0
+
+    # Create the gauss kernel for blurring the input image
+    # It will be convolved with the image
+    # wsize should be an odd number
+    wsize = 5
+    sigma = 4
+    gausskernel = gaussFilter(sigma, window = wsize)
+    # fx is the filter for vertical gradient
+    # fy is the filter for horizontal gradient
+    # Please not the vertical direction is positive X
+
+    fx = createFilter([0,  1, 0,
+                       0,  0, 0,
+                       0, -1, 0])
+    fy = createFilter([ 0, 0, 0,
+                       -1, 0, 1,
+                        0, 0, 0])
+
+    imout = conv(imin, gausskernel, 'valid')
+    # print "imout:", imout.shape
+    gradxx = conv(imout, fx, 'valid')
+    gradyy = conv(imout, fy, 'valid')
+
+    gradx = np.zeros(imin.shape)
+    grady = np.zeros(imin.shape)
+    padx = (imin.shape[0] - gradxx.shape[0]) / 2.0
+    pady = (imin.shape[1] - gradxx.shape[1]) / 2.0
+    gradx[padx:-padx, pady:-pady] = gradxx
+    grady[padx:-padx, pady:-pady] = gradyy
+    
+    # Net gradient is the square root of sum of square of the horizontal
+    # and vertical gradients
+
+    grad = hypot(gradx, grady)
+    theta = arctan2(grady, gradx)
+    theta = 180 + (180 / pi) * theta
+    
+    # Only significant magnitudes are considered. All others are removed
+    xx, yy = where(grad < 3)
+    theta[xx, yy] = 0
+    grad[xx, yy] = 0
+    
     k = -1
     unpainted = np.where (canvas == -1)
+#     canvas = paintStroke(canvas, x,y, np.array([2,2]), np.array([2,2]), np.array([1,0,0]), 1)
+
     
     cannied = canny(imRGB[:,:,0], 2)
     
     while (len(unpainted[1]) > 1):
         k += 1
-        
-#         # Randomly select stroke center
-#         cntr = np.floor(np.random.rand(2,1).flatten() * np.array([sizeIm[1], sizeIm[0]])) + 1
-#         print cntr
-#         cntr = np.amin(np.vstack((cntr, np.array([sizeIm[1], sizeIm[0]]))), axis=0)
-# 
+
+        unpainted = np.where(canvas == -1)
         rando = randint(0,len(unpainted[0]) - 1)
         
         cntr = np.array([unpainted[1][rando], unpainted[0][rando]])
-        cntr = np.amin(np.vstack((cntr, np.array([sizeIm[1], sizeIm[0]]))), axis=0)
+#         cntr = np.amin(np.vstack((cntr, np.array([sizeIm[1], sizeIm[0]]))), axis=0)
 
-#        # Grab colour from image at center position of the stroke.
-#        colour = np.reshape(imRGB[cntr[1]-1, cntr[0]-1, :],(3,1))
-#        # Add the stroke to the canvas
-#        nx, ny = (sizeIm[1], sizeIm[0])
-#        length1, length2 = (halfLen, halfLen) 
+        # Orientation of paint brush strokes
+        stroke_theta =  theta[cntr[1],cntr[0]]
+        # print 'stroke_theta is', stroke_theta
+        # Set vector from center to one end of the stroke.
+        delta = np.array([cos(radians(stroke_theta)), sin(radians(stroke_theta))])
+        
+
+        length1, length2 = (halfLen, halfLen) 
 
         # if the center is at a canny edge:
         if (cannied[cntr[1]][cntr[0]] == 1):
             # Grab colour from image at center position of the stroke.
-            colour = np.reshape(imRGB[cntr[1]-1, cntr[0]-1, :],(3,1))
+            colour = np.reshape(imRGB[cntr[1], cntr[0], :],(3,1))
             # Add the stroke to the canvas
             nx, ny = (sizeIm[1], sizeIm[0])
             # length1, length2 = (halfLen, halfLen)        
-            canvas = paintStroke(canvas, x, y, cntr, cntr, colour, rad)
-            print 'stroke of length 1', k
+            canvas = paintStroke(canvas, x, y, cntr+1, cntr+1, colour, rad)
+            # print 'stroke of length 1', k
 
-        # otherwise, paint strokes until you hit a canny edge
         else:
-            mult1 = 1
-            p1 = cntr - [int(i) for i in delta]
-            while ((mult1 < length2) and (cannied[p1[1]][p1[0]] != 1)):
-                p1 = cntr - [int(i)*mult1 for i in delta]
-                mult1 = mult1 + 1        
+            len1 = 0
+            while (True):
+                candidate_len = len1 + 1
+                if (candidate_len >= length1):
+                    break
+                p = cntr - delta * len1
+                if (p[0] >= len(canvas[0]) or p[0] < 0):
+                    break
+                if (p[1] >= len(canvas) or p[1] < 0):
+                    break
+                if cannied[p[1]][p[0]] == 1:
+                    break
+                len1 = candidate_len
+            p1 = cntr - delta * len1
             
-            mult2 = 1
-            p2 = cntr + [int(i) for i in delta]
-            while ((mult2 < length1) and (cannied[p2[1]][p2[0]] != 1)):
-                p2 = cntr + [int(i)*mult2 for i in delta]
-                mult2 = mult2 + 1 
+            len2 = 0
+            while (True):
+                candidate_len = len2 + 1
+                if (candidate_len >= length2):
+                    break
+                p = cntr + delta * len2
+                if (p[0] >= len(canvas[0]) or p[0] < 0):
+                    break
+                if (p[1] >= len(canvas) or p[1] < 0):
+                    break
+                if cannied[p[1]][p[0]] == 1:
+                    break
+                len2 = candidate_len
+            p2 = cntr + delta * len2
+
                 
-            colour = np.reshape(imRGB[cntr[1]-1, cntr[0]-1, :],(3,1))
+            colour = np.reshape(imRGB[cntr[1], cntr[0], :],(3,1))
             # Add the stroke to the canvas
             nx, ny = (sizeIm[1], sizeIm[0])
-            canvas = paintStroke(canvas, x, y, p1, p2, colour, rad)
-            'stroke', k
-
-
-
-#        # Grab colour from image at center position of the stroke.
-#        colour = np.reshape(imRGB[cntr[1]-1, cntr[0]-1, :],(3,1))
-#        # Add the stroke to the canvas
-#        nx, ny = (sizeIm[1], sizeIm[0])
-#        length1, length2 = (halfLen, halfLen)        
-#        canvas = paintStroke(canvas, x, y, cntr - delta * length2, cntr + delta * length1, colour, rad)
-#        #print imRGB[cntr[1]-1, cntr[0]-1, :], canvas[cntr[1]-1, cntr[0]-1, :]
-#        print 'stroke', k
-        unpainted = np.where (canvas == -1)
+            canvas = paintStroke(canvas, x, y, p1+1, p2+1, colour, rad)
+            
+        # # finding a negative pixel
+        # # Randomly select stroke center
+        # cntr = np.floor(np.random.rand(2,1).flatten() * np.array([sizeIm[1], sizeIm[0]])) + 1
+        # cntr = np.amin(np.vstack((cntr, np.array([sizeIm[1], sizeIm[0]]))), axis=0)
+        # # Grab colour from image at center position of the stroke.
+        # colour = np.reshape(imRGB[cntr[1]-1, cntr[0]-1, :],(3,1))
+        # # Add the stroke to the canvas
+        # nx, ny = (sizeIm[1], sizeIm[0])
+        # length1, length2 = (halfLen, halfLen)        
+        # canvas = paintStroke(canvas, x, y, cntr - delta * length2, cntr + delta * length1, colour, rad)
+        # #print imRGB[cntr[1]-1, cntr[0]-1, :], canvas[cntr[1]-1, cntr[0]-1, :]
+        # print 'stroke', k
         
+        unpainted = np.where (canvas == -1)
     print "done!"
     time.time()
     
