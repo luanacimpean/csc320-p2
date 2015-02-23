@@ -202,6 +202,7 @@ if __name__ == "__main__":
         k += 1
 
         # r,g,b 
+        # ran is short for range
         ran = 15.0/255.0
         rand_r = round(random.uniform((-1*ran), ran), 6)
         rand_b = round(random.uniform((-1*ran), ran), 6)
