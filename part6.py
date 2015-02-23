@@ -200,9 +200,7 @@ if __name__ == "__main__":
     
     while (len(unpainted[1]) > 1):
         k += 1
-    
-    
-        # TODO: rgb isnt working. 'float' object is not callable error? lolwut
+
         # r,g,b 
         ran = 15.0/255.0
         rand_r = round(random.uniform((-1*ran), ran), 6)
