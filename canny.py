@@ -11,12 +11,12 @@ try:
 except ImportError:
     print 'PIL not found. You cannot view the image'
 import os
- 
+import numpy as np
 from scipy import *
 from scipy.ndimage import *
 from scipy.signal import convolve2d as conv
 
-def canny(im, sigma, thresHigh = 25,thresLow = 15):
+def canny(im, sigma = 4, thresHigh = 40,thresLow = 5):
     '''
         Takes an input image in the range [0, 1] and generate a gradient image
         with edges marked by 1 pixels.
@@ -57,6 +57,7 @@ def canny(im, sigma, thresHigh = 25,thresLow = 15):
     grad = hypot(gradx, grady)
     theta = arctan2(grady, gradx)
     theta = 180 + (180 / pi) * theta
+    
     # Only significant magnitudes are considered. All others are removed
     xx, yy = where(grad < 10)
     theta[xx, yy] = 0
@@ -74,6 +75,7 @@ def canny(im, sigma, thresHigh = 25,thresLow = 15):
                         +(theta>292.5)*(theta<337.5)) == True)
 
     theta = theta
+
     Image.fromarray(theta).convert('L').save('Angle map.jpg')
     theta[x0,y0] = 0
     theta[x45,y45] = 45
@@ -93,7 +95,6 @@ def canny(im, sigma, thresHigh = 25,thresLow = 15):
                 temp.putpixel((j,i),(0,255,0))
     retgrad = grad.copy()
     x,y = retgrad.shape
-
     for i in range(x):
         for j in range(y):
             if theta[i,j] == 0:
@@ -225,7 +226,6 @@ def nextNbd(im, p0, p1, p2, thres):
     return -1
 
 if __name__ == "__main__":
-    os.chdir('/Users/sajjad/School/ThirdYear/CSC320/repo/csc320-p2')
     imRGB = array(Image.open('orchid.jpg'))
     imRGB = double(imRGB) / 255.0
     cannied = canny(imRGB[:,:,0], 2)
